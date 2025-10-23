@@ -10,6 +10,8 @@ export const basePath = '/tvo/security-scan/localstack/infra';
 
 export interface AppStackProps extends cdk.StackProps {
   eventBusName: string;
+  parameterTableName: string;
+  aesKeyPath: string;
 }
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
@@ -35,6 +37,8 @@ export class AppStack extends cdk.Stack {
         AWS_STAGE: 'local',
         LOG_LEVEL: 'debug',
         TITVO_EVENT_BUS_NAME: props.eventBusName,
+        TITVO_PARAMETER_TABLE_NAME: props.parameterTableName,
+        TITVO_AES_KEY_PATH: props.aesKeyPath,
         NODE_OPTIONS: '--enable-source-maps',
       },
     });
