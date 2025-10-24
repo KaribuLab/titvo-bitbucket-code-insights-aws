@@ -15,6 +15,8 @@ const aliases = Object.entries(tsconfig.compilerOptions.paths || {}).reduce(
 module.exports = {
   context: __dirname,
   target: 'node',
+  mode: 'production',
+  devtool: 'source-map',
   entry: {
     entrypoint: ['./src/entrypoint.ts']
   },
@@ -25,7 +27,8 @@ module.exports = {
       type: 'module'
     },
     chunkFormat: 'module',
-    clean: true
+    clean: true,
+    pathinfo: true
   },
   experiments: {
     outputModule: true,
@@ -56,7 +59,9 @@ module.exports = {
                 legacyDecorator: true,
                 decoratorMetadata: true
               }
-            }
+            },
+            sourceMaps: true,
+            inlineSourcesContent: false
           }
         }
       }

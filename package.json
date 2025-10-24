@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "clean": "rm -rf dist build",
-    "build": "npm run clean && rspack build"
+    "build": "npm run clean && rspack build",
+    "dev": "turbowatch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "AWS",
@@ -12,16 +15,26 @@
   "author": "Patricio Ascencio <patricio.ascencio@karibu.cl>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@nestjs/testing": "^11.1.7",
     "@rspack/cli": "1.2.8",
     "@rspack/core": "1.2.8",
+    "@swc/core": "^1.13.5",
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "22.5.4",
-    "typescript": "5.5.4"
+    "@vitest/ui": "^4.0.2",
+    "turbowatch": "^2.29.4",
+    "typescript": "5.5.4",
+    "unplugin-swc": "^1.5.8",
+    "vitest": "^4.0.2"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.916.0",
+    "@aws-sdk/client-eventbridge": "^3.916.0",
+    "@aws-sdk/client-secrets-manager": "^3.916.0",
+    "@aws-sdk/lib-dynamodb": "^3.916.0",
     "@nestjs/common": "11.1.5",
-    "@nestjs/core": "11.1.5",
     "@nestjs/config": "4.0.2",
+    "@nestjs/core": "11.1.5",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
     "nestjs-pino": "4.4.0",
