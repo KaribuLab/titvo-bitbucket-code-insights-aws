@@ -34,7 +34,7 @@ const service = app.get(CodeInsightsService)
 
 interface CodeInsightsEvent {
   detail: {
-    task_id: string
+    job_id: string
     data: {
       report_url: string
       workspace_id: string,
@@ -61,7 +61,7 @@ export const handler: Handler<SQSEvent> = async (
       const promises = records.map(async (record) => {
         logger.debug(`Procesando mensaje: ${JSON.stringify(record)}`)
         return service.process({
-          taskId: record.detail.task_id,
+          jobId: record.detail.job_id,
           data: {
             reportURL: record.detail.data.report_url,
             workspaceId: record.detail.data.workspace_id,

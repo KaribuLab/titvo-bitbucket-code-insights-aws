@@ -118,7 +118,7 @@ export class CodeInsightsService {
       Source: 'mcp.tool.bitbucket.code-insights',
       DetailType: 'output',
       Detail: JSON.stringify({
-        task_id: input.taskId,
+        job_id: input.jobId,
         success: true,
         message: 'Code insights generated successfully',
         data: {
@@ -128,7 +128,7 @@ export class CodeInsightsService {
       EventBusName: eventBusName
     }])
     return {
-      taskId: input.taskId,
+      jobId: input.jobId,
       data: {
         reportURL: input.data.reportURL,
       },

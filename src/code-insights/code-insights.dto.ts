@@ -14,7 +14,7 @@ export class Annotation {
 }
 
 export class CodeInsightsInputDto {
-  taskId: string
+  jobId: string
   data: {
     reportURL: string
     workspaceId: string
@@ -25,7 +25,7 @@ export class CodeInsightsInputDto {
   }
 }
 export class CodeInsightsOutputDto {
-  taskId: string
+  jobId: string
   data: {
     reportURL: string
   }
