@@ -1,6 +1,7 @@
 export enum ReportStatus {
-  SUCCESS = 'SUCCESS',
-  FAILURE = 'FAILURE',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  WARNING = 'WARNING',
 }
 
 export class Annotation {

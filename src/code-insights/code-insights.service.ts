@@ -45,7 +45,7 @@ export class CodeInsightsService {
     const createReportUrl = `${baseUrl}/${input.data.repoSlug}/commit/${input.data.commitHash}/reports/${reportId}`
     
     // Mapear ReportStatus a los valores que espera Bitbucket
-    const bitbucketResult = input.data.status === ReportStatus.SUCCESS ? 'PASSED' : 'FAILED'
+    const bitbucketResult = input.data.status === ReportStatus.COMPLETED ? 'PASSED' : 'FAILED'
     
     const createReportBody = JSON.stringify({
       title: "Titvo Security Scan",
@@ -57,7 +57,7 @@ export class CodeInsightsService {
         {
           title: "Safe to merge?",
           type: "BOOLEAN",
-          value: input.data.status === ReportStatus.SUCCESS,
+          value: input.data.status === ReportStatus.COMPLETED,
         },
         {
           title: "Number of issues",
