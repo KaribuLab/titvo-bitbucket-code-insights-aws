@@ -35,7 +35,7 @@ export class DynamoDBService {
 }
 
 export function createDynamoDBService(options: DynamoDBServiceOptions): DynamoDBService {
-    const dynamoDBClient = options.awsStage === 'local' ? new DynamoDBClient({
+    const dynamoDBClient = options.awsStage === 'localstack' ? new DynamoDBClient({
             region: options.awsRegion,
             endpoint: options.awsEndpoint,
         }) : new DynamoDBClient();

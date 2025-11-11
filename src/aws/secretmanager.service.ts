@@ -20,7 +20,7 @@ export class SecretManagerService {
 }
 
 export function createSecretManagerService(options: SecretManagerServiceOptions): SecretManagerService {
-    const secretManagerClient = options.awsStage === 'local' ? new SecretsManagerClient({
+    const secretManagerClient = options.awsStage === 'localstack' ? new SecretsManagerClient({
         endpoint: options.awsEndpoint,
         region: options.awsRegion,
     }) : new SecretsManagerClient();
