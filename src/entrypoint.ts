@@ -36,7 +36,7 @@ interface CodeInsightsEvent {
   detail: {
     job_id: string
     data: {
-      report_url: string
+      report_u_r_l: string,// FIXME: change to report_url
       workspace_id: string,
       commit_hash: string,
       repo_slug: string,
@@ -63,7 +63,7 @@ export const handler: Handler<SQSEvent> = async (
         return service.process({
           jobId: record.detail.job_id,
           data: {
-            reportURL: record.detail.data.report_url,
+            reportURL: record.detail.data.report_u_r_l,
             workspaceId: record.detail.data.workspace_id,
             commitHash: record.detail.data.commit_hash,
             repoSlug: record.detail.data.repo_slug,
