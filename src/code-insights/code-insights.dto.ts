@@ -27,6 +27,8 @@ export class CodeInsightsInputDto {
 }
 export class CodeInsightsOutputDto {
   jobId: string
+  success: boolean
+  message: string
   data: {
     reportURL: string
   }
