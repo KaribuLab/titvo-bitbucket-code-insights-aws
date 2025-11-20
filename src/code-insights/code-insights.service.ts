@@ -53,6 +53,8 @@ export class CodeInsightsService {
       const baseUrl = `${BITBUCKET_API_URL}/repositories/${input.data.workspaceId}`
       const createReportUrl = `${baseUrl}/${input.data.repoSlug}/commit/${input.data.commitHash}/reports/${reportId}`
 
+      this.logger.debug(`Create code insights report URL: ${createReportUrl}`)
+
       // Mapear ReportStatus a los valores que espera Bitbucket
       const bitbucketResult = input.data.status === ReportStatus.COMPLETED ? 'PASSED' : 'FAILED'
 
@@ -129,10 +131,8 @@ export class CodeInsightsService {
       this.logger.error(`Error processing code insights for job ${input.jobId}: ${error}`)
       eventData.success = false;
       eventData.message = (error as Error).message ?? error as string;
-    }
-
-    finally {
-      this.eventBridgeService.putEvents([{
+    } finally {
+      await this.eventBridgeService.putEvents([{
         Source: 'mcp.tool.bitbucket.code-insights',
         DetailType: 'output',
         Detail: JSON.stringify(eventData),
