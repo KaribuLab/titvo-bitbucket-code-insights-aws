@@ -23,7 +23,7 @@ export class CodeInsightsService {
       success: false,
       message: 'Not executed',
       data: {
-        report_url: ''
+        code_insights_url: ''
       }
     }
     try {
@@ -124,7 +124,7 @@ export class CodeInsightsService {
       }
       eventData.success = true;
       eventData.message = 'Code insights generated successfully';
-      eventData.data.report_url = createReportUrl;
+      eventData.data.code_insights_url = createReportUrl;
     } catch (error) {
       this.logger.error(`Error processing code insights for job ${input.jobId}: ${error}`)
       eventData.success = false;
@@ -144,7 +144,7 @@ export class CodeInsightsService {
       success: eventData.success,
       message: eventData.message,
       data: {
-        reportURL: eventData.data.report_url,
+        codeInsightsURL: eventData.data.code_insights_url,
       },
     }
   }

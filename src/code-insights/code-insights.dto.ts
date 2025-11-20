@@ -30,6 +30,6 @@ export class CodeInsightsOutputDto {
   success: boolean
   message: string
   data: {
-    reportURL: string
+    codeInsightsURL: string
   }
 }
