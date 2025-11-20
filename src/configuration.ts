@@ -4,4 +4,5 @@ export default () => ({
   awsRegion: process.env.AWS_REGION,
   aesKeyPath: process.env.TITVO_AES_KEY_PATH,
   parameterTableName: process.env.TITVO_PARAMETER_TABLE_NAME,
+  titvoEventBusName: process.env.TITVO_EVENT_BUS_NAME,
 });
