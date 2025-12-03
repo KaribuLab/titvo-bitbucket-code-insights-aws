@@ -16,7 +16,7 @@ include {
 dependency log {
   config_path = "${get_parent_terragrunt_dir()}/aws/cloudwatch"
   mock_outputs = {
-    log_arn = "log_arn"
+    log_arn = "arn:aws:logs:us-east-2:123456789012:log-group:/aws/lambda/mock"
   }
 }
 
@@ -24,7 +24,10 @@ dependency parameters {
   config_path = "${get_parent_terragrunt_dir()}/aws/parameter"
   mock_outputs = {
     parameters = {
-      "/tvo/security-scan/prod/infra/sqs/mcp/bitbucket-code-insights/output/queue_url" = "arn:aws:sqs:us-east-1:000000000000:test-queue"
+      "/tvo/security-scan/prod/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn" = "arn:aws:sqs:us-east-2:123456789012:tvo-mcp-bitbucket-code-insights-input-prod"
+      "/tvo/security-scan/prod/infra/secrets/bitbucket/secret_arn"                    = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/tvo/mcp/prod/bitbucket_credentials"
+      "/tvo/security-scan/prod/infra/eventbridge/eventbus_arn"                        = "arn:aws:events:us-east-2:123456789012:event-bus/tvo-mcp-eventbus-prod"
+      "/tvo/security-scan/prod/infra/eventbridge/eventbus_name"                       = "tvo-mcp-eventbus-prod"
     }
   }
 }
@@ -51,16 +54,32 @@ inputs = {
           "sqs:GetQueueAttributes",
           "sqs:ReceiveMessage",
         ],
-        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/code-insights/queue_arn"]
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "secretsmanager:GetSecretValue",
+        ],
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/secrets/bitbucket/secret_arn"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "events:PutEvents",
+        ],
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_arn"]
       },
     ]
   })
   environment_variables = {
-    AWS_STAGE = local.serverless.locals.stage
-    LOG_LEVEL = local.serverless.locals.stage != "prod" ? "debug" : "info"
+    AWS_STAGE            = local.serverless.locals.stage
+    LOG_LEVEL            = local.serverless.locals.stage != "prod" ? "debug" : "info"
+    BITBUCKET_SECRET_ARN = dependency.parameters.outputs.parameters["${local.base_path}/infra/secrets/bitbucket/secret_arn"]
+    TITVO_EVENT_BUS_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_name"]
   }
   event_sources_arn = [
-    dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/output/queue_url"]
+    dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn"]
   ]
   runtime       = "nodejs22.x"
   handler       = "src/entrypoint.handler"

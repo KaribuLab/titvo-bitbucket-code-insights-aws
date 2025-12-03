@@ -12,8 +12,8 @@ locals {
       name = "Production"
     }
   }
-  service_name   = "bitbucket-code-insights"
-  service_bucket = "${local.service_name}-${local.region}"
+  service_name   = "tvo-mcp-bitbucket-code-insights"
+  service_bucket = "tvo-mcp-tfstate-bitbucket-code-insights"
   log_retention  = 7
   parameter_path = "/tvo/security-scan"
   common_tags = {}

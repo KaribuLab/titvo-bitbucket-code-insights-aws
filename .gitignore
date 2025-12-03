@@ -59,3 +59,22 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .terragrunt-cache
 .terraform.lock.hcl
 
+# Archivos generados por Terragrunt
+.terragrunt-cache/
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+*.tfplan
+.terraform.lock.hcl
+terraform.tfvars.json
+terragrunt-debug.tfvars.json
+
+# Archivos generados por Terraform
+.terraform.tfstate.lock.info
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
