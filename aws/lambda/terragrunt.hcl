@@ -25,9 +25,12 @@ dependency parameters {
   mock_outputs = {
     parameters = {
       "/tvo/security-scan/prod/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn" = "arn:aws:sqs:us-east-2:123456789012:tvo-mcp-bitbucket-code-insights-input-prod"
-      "/tvo/security-scan/prod/infra/secrets/bitbucket/secret_arn"                    = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/tvo/mcp/prod/bitbucket_credentials"
       "/tvo/security-scan/prod/infra/eventbridge/eventbus_arn"                        = "arn:aws:events:us-east-2:123456789012:event-bus/tvo-mcp-eventbus-prod"
       "/tvo/security-scan/prod/infra/eventbridge/eventbus_name"                       = "tvo-mcp-eventbus-prod"
+      "/tvo/security-scan/prod/infra/secret/manager/arn"                              = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/tvo/security-scan/prod"
+      "/tvo/security-scan/prod/infra/dynamo/parameter-table-arn"                      = "arn:aws:dynamodb:us-east-2:123456789012:table/tvo-security-scan-configuration-table-prod"
+      "/tvo/security-scan/prod/infra/dynamo/parameter-table-name"                     = "tvo-security-scan-configuration-table-prod"
+      "/tvo/security-scan/prod/infra/kms/encryption-key-name"                         = "/tvo/security-scan/prod/infra/encryption-key"
     }
   }
 }
@@ -59,24 +62,33 @@ inputs = {
       {
         "Effect" : "Allow",
         "Action" : [
-          "secretsmanager:GetSecretValue",
+          "events:PutEvents",
         ],
-        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/secrets/bitbucket/secret_arn"]
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_arn"]
       },
       {
         "Effect" : "Allow",
         "Action" : [
-          "events:PutEvents",
+          "secretsmanager:GetSecretValue",
         ],
-        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_arn"]
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/secret/manager/arn"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "dynamodb:GetItem",
+        ],
+        "Resource" : dependency.parameters.outputs.parameters["${local.base_path}/infra/dynamo/parameter-table-arn"]
       },
     ]
   })
   environment_variables = {
     AWS_STAGE            = local.serverless.locals.stage
     LOG_LEVEL            = local.serverless.locals.stage != "prod" ? "debug" : "info"
-    BITBUCKET_SECRET_ARN = dependency.parameters.outputs.parameters["${local.base_path}/infra/secrets/bitbucket/secret_arn"]
-    TITVO_EVENT_BUS_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_name"]
+    TITVO_EVENT_BUS_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_name"],
+    PARAMETER_TABLE_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/dynamo/parameter-table-name"],
+    AES_KEY_PATH         = dependency.parameters.outputs.parameters["${local.base_path}/infra/kms/encryption-key-name"],
+    NODE_OPTIONS         = "--enable-source-maps",
   }
   event_sources_arn = [
     dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn"]
