@@ -83,12 +83,12 @@ inputs = {
     ]
   })
   environment_variables = {
-    AWS_STAGE            = local.serverless.locals.stage
-    LOG_LEVEL            = local.serverless.locals.stage != "prod" ? "debug" : "info"
-    TITVO_EVENT_BUS_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_name"],
-    PARAMETER_TABLE_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/dynamo/parameter-table-name"],
-    AES_KEY_PATH         = dependency.parameters.outputs.parameters["${local.base_path}/infra/kms/encryption-key-name"],
-    NODE_OPTIONS         = "--enable-source-maps",
+    AWS_STAGE                 = local.serverless.locals.stage
+    LOG_LEVEL                 = local.serverless.locals.stage != "prod" ? "debug" : "info"
+    TITVO_EVENT_BUS_NAME      = dependency.parameters.outputs.parameters["${local.base_path}/infra/eventbridge/eventbus_name"],
+    TITVO_PARAMETER_TABLE_NAME = dependency.parameters.outputs.parameters["${local.base_path}/infra/dynamo/parameter-table-name"],
+    TITVO_AES_KEY_PATH        = dependency.parameters.outputs.parameters["${local.base_path}/infra/kms/encryption-key-name"],
+    NODE_OPTIONS              = "--enable-source-maps",
   }
   event_sources_arn = [
     dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn"]
