@@ -80,8 +80,7 @@ async function getParameters(ssmClient: SSMClient, nextToken?: string): Promise<
 
     // Usar el sintetizador heredado para LocalStack (no requiere bootstrap)
     synthesizer: new cdk.LegacyStackSynthesizer(),
-    eventBusName: params[`${basePath}/eventbridge/eventbus_name`],
-    parameterTableName: params[`${basePath}/dynamodb/parameter/dynamodb_table_name`],
+    parameterTableName: params[`${basePath}/dynamo/parameter-table-name`],
     aesKeyPath: '/tvo/security-scan/localstack/aes_secret',
 
     /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */

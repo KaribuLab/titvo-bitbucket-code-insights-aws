@@ -2,14 +2,12 @@ import { NestFactory } from '@nestjs/core'
 import {
   Context,
   Handler,
-  SQSEvent,
-  SQSRecord
 } from 'aws-lambda'
 import { AppModule } from '@lambda/app.module'
 import { INestApplicationContext, Logger as NestLogger } from '@nestjs/common'
 import { Logger } from 'nestjs-pino'
 import { CodeInsightsService } from '@lambda/code-insights/code-insights.service'
-import { Annotation, CodeInsightsInputDto, ReportStatus } from '@lambda/code-insights/code-insights.dto'
+import { CodeInsightsInputDto, CodeInsightsOutputDto } from '@lambda/code-insights/code-insights.dto'
 
 const logger = new NestLogger('code-insightsLambdaHandler')
 
@@ -32,54 +30,17 @@ if (app === undefined) {
 
 const service = app.get(CodeInsightsService)
 
-interface CodeInsightsEvent {
-  detail: {
-    job_id: string
-    data: {
-      report_u_r_l: string,// FIXME: change to report_url
-      workspace_id: string,
-      commit_hash: string,
-      repo_slug: string,
-      status: ReportStatus
-      annotations: Annotation[]
-    }
-  }
-}
 
-export const handler: Handler<SQSEvent> = async (
-  event: SQSEvent,
+export const handler: Handler<CodeInsightsInputDto> = async (
+  event: CodeInsightsInputDto,
   _context: Context
-): Promise<void> => {
-  if (event && event.Records && Array.isArray(event.Records)) {
-    try {
-      logger.debug(`Iniciando code-insights LambdaHandler: ${JSON.stringify(event)}`)
-
-      const records: CodeInsightsEvent[] = event.Records.map(
-        (record: SQSRecord) => JSON.parse(record.body) as CodeInsightsEvent
-      )
-
-      const promises = records.map(async (record) => {
-        logger.debug(`Procesando mensaje: ${JSON.stringify(record)}`)
-        return service.process({
-          jobId: record.detail.job_id,
-          data: {
-            reportURL: record.detail.data.report_u_r_l,
-            workspaceId: record.detail.data.workspace_id,
-            commitHash: record.detail.data.commit_hash,
-            repoSlug: record.detail.data.repo_slug,
-            status: record.detail.data.status,
-            annotations: record.detail.data.annotations,
-          },
-        })
-      })
-
-      await Promise.all(promises)
-
-      logger.debug('code-insights LambdaHandler finalizado.')
-    } catch (e) {
-      logger.error('Error al procesar el servicio')
-      logger.error(e)
-      throw e
-    }
+): Promise<CodeInsightsOutputDto> => {
+  try {
+    logger.debug(`Procesando mensaje: ${JSON.stringify(event)}`)
+    return service.process(event)
+  } catch (e) {
+    logger.error('Error al procesar el servicio')
+    logger.error(e)
+    throw e
   }
 }

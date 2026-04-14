@@ -5,7 +5,6 @@ import {
   ReportStatus,
 } from "@lambda/code-insights/code-insights.dto";
 import { ParameterService } from "@lambda/parameter/parameter.service";
-import { EventBridgeService } from "@lambda/aws/eventbridge.service";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
 
@@ -18,32 +17,19 @@ export class CodeInsightsService {
   private apiToken: string | null = null;
   constructor(
     private readonly parameterService: ParameterService,
-    private readonly eventBridgeService: EventBridgeService,
-    private readonly configService: ConfigService,
   ) {}
   async process(input: CodeInsightsInputDto): Promise<CodeInsightsOutputDto> {
-    const eventBusName = this.configService.get<string>(
-      "titvoEventBusName",
-    ) as string;
-    const eventData = {
-      job_id: input.jobId,
-      success: false,
-      message: "Not executed",
-      data: {
-        code_insights_url: "",
-      },
-    };
     try {
       const apiToken = await this.getAPIToken();
       const reportId = randomUUID();
-      const baseUrl = `${BITBUCKET_API_URL}/repositories/${input.data.workspaceId}`;
-      const createReportUrl = `${baseUrl}/${input.data.repoSlug}/commit/${input.data.commitHash}/reports/${reportId}`;
+      const baseUrl = `${BITBUCKET_API_URL}/repositories/${input.workspaceId}`;
+      const createReportUrl = `${baseUrl}/${input.repoSlug}/commit/${input.commitHash}/reports/${reportId}`;
 
       this.logger.debug(`Create code insights report URL: ${createReportUrl}`);
 
       // Mapear ReportStatus a los valores que espera Bitbucket
       const bitbucketResult =
-        input.data.status === ReportStatus.COMPLETED ? "PASSED" : "FAILED";
+        input.status === ReportStatus.COMPLETED ? "PASSED" : "FAILED";
 
       const createReportBody = JSON.stringify({
         title: "Titvo Security Scan",
@@ -55,17 +41,17 @@ export class CodeInsightsService {
           {
             title: "Safe to merge?",
             type: "BOOLEAN",
-            value: input.data.status === ReportStatus.COMPLETED,
+            value: input.status === ReportStatus.COMPLETED,
           },
           {
             title: "Number of issues",
             type: "NUMBER",
-            value: input.data.annotations.length,
+            value: input.annotations.length,
           },
           {
             title: "Report",
             type: "LINK",
-            value: { text: "See full report", href: input.data.reportURL },
+            value: { text: "See full report", href: input.reportURL },
           },
         ],
       });
@@ -74,7 +60,7 @@ export class CodeInsightsService {
         method: "PUT",
         body: createReportBody,
         headers: {
-          Authorization: apiToken,
+          Authorization: `Basic ${apiToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -89,9 +75,9 @@ export class CodeInsightsService {
           `Error creating report ${createReportResponse.status} ${createReportResponse.statusText}`,
         );
       }
-      const createAnnotationtUrl = `${baseUrl}/${input.data.repoSlug}/commit/${input.data.commitHash}/reports/${reportId}/annotations`;
+      const createAnnotationtUrl = `${baseUrl}/${input.repoSlug}/commit/${input.commitHash}/reports/${reportId}/annotations`;
       const createAnnotationBody = JSON.stringify(
-        input.data.annotations.map((annotation) => {
+        input.annotations.map((annotation) => {
           return {
             external_id: `${reportId}-annotation-${randomUUID()}`,
             annotation_type: "VULNERABILITY", // Requerido: VULNERABILITY, CODE_SMELL, BUG
@@ -108,7 +94,7 @@ export class CodeInsightsService {
         method: "POST",
         body: createAnnotationBody,
         headers: {
-          Authorization: apiToken,
+          Authorization: `Basic ${apiToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -123,33 +109,17 @@ export class CodeInsightsService {
           `Error creating annotation ${createAnnotationResponse.status} ${createAnnotationResponse.statusText}`,
         );
       }
-      eventData.success = true;
-      eventData.message = "Code insights generated successfully";
-      eventData.data.code_insights_url = createReportUrl;
+      return {
+        codeInsightsURL: createReportUrl,
+      };
     } catch (error) {
       this.logger.error(
-        `Error processing code insights for job ${input.jobId}: ${error}`,
+        `Error processing code insights: ${error}`,
       );
-      eventData.success = false;
-      eventData.message = (error as Error).message ?? (error as string);
-    } finally {
-      await this.eventBridgeService.putEvents([
-        {
-          Source: "mcp.tool.bitbucket.code-insights",
-          DetailType: "output",
-          Detail: JSON.stringify(eventData),
-          EventBusName: eventBusName,
-        },
-      ]);
+      throw new Error(
+        `Error processing code insights: ${error}`,
+      );
     }
-    return {
-      jobId: input.jobId,
-      success: eventData.success,
-      message: eventData.message,
-      data: {
-        codeInsightsURL: eventData.data.code_insights_url,
-      },
-    };
   }
   /**
    * Obtiene un token de acceso OAuth 2.0 (Client Credentials Grant).

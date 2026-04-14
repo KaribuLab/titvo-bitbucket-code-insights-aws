@@ -15,21 +15,14 @@ export class Annotation {
 }
 
 export class CodeInsightsInputDto {
-  jobId: string
-  data: {
-    reportURL: string
-    workspaceId: string
-    commitHash: string
-    repoSlug: string
-    status: ReportStatus
-    annotations: Annotation[]
-  }
+  reportURL: string
+  workspaceId: string
+  commitHash: string
+  repoSlug: string
+  status: ReportStatus
+  annotations: Annotation[]
 }
+
 export class CodeInsightsOutputDto {
-  jobId: string
-  success: boolean
-  message: string
-  data: {
-    codeInsightsURL: string
-  }
+  codeInsightsURL: string
 }
