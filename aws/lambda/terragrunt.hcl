@@ -21,7 +21,7 @@ dependency log {
 }
 
 dependency parameters {
-  config_path = "${get_parent_terragrunt_dir()}/aws/parameter"
+  config_path = "${get_parent_terragrunt_dir()}/aws/parameter/lookup"
   mock_outputs = {
     parameters = {
       "/tvo/security-scan/prod/infra/secret/manager/arn"          = "arn:aws:secretsmanager:us-east-2:123456789012:secret:/tvo/security-scan/prod"
