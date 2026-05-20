@@ -69,9 +69,6 @@ inputs = {
     TITVO_AES_KEY_PATH         = dependency.parameters.outputs.parameters["${local.base_path}/infra/kms/encryption-key-name"],
     NODE_OPTIONS               = "--enable-source-maps",
   }
-  event_sources_arn = [
-    dependency.parameters.outputs.parameters["${local.base_path}/infra/sqs/mcp/bitbucket-code-insights/input/queue_arn"]
-  ]
   runtime       = "nodejs22.x"
   handler       = "src/entrypoint.handler"
   bucket        = local.serverless.locals.service_bucket
