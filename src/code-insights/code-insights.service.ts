@@ -5,11 +5,10 @@ import {
   ReportStatus,
 } from "@lambda/code-insights/code-insights.dto";
 import { ParameterService } from "@lambda/parameter/parameter.service";
-import { ConfigService } from "@nestjs/config";
-import { randomUUID } from "crypto";
 
 const BITBUCKET_API_URL = "https://api.bitbucket.org/2.0";
 const BITBUCKET_API_TOKEN_PARAM_NAME = "bitbucket_api_token";
+const REPORTER = "titvo-security-scan";
 
 @Injectable()
 export class CodeInsightsService {
@@ -21,7 +20,8 @@ export class CodeInsightsService {
   async process(input: CodeInsightsInputDto): Promise<CodeInsightsOutputDto> {
     try {
       const apiToken = await this.getAPIToken();
-      const reportId = randomUUID();
+      const scanMode = input.scanMode === "full" ? "full" : "commit";
+      const reportId = `${REPORTER}-${scanMode}`;
       const baseUrl = `${BITBUCKET_API_URL}/repositories/${input.workspaceId}`;
       const createReportUrl = `${baseUrl}/${input.repoSlug}/commit/${input.commitHash}/reports/${reportId}`;
 
@@ -35,7 +35,7 @@ export class CodeInsightsService {
         title: "Titvo Security Scan",
         details: "Security scan report",
         report_type: "SECURITY",
-        reporter: "titvo-security-scan",
+        reporter: REPORTER,
         result: bitbucketResult,
         data: [
           {
@@ -77,9 +77,9 @@ export class CodeInsightsService {
       }
       const createAnnotationtUrl = `${baseUrl}/${input.repoSlug}/commit/${input.commitHash}/reports/${reportId}/annotations`;
       const createAnnotationBody = JSON.stringify(
-        input.annotations.map((annotation) => {
+        input.annotations.map((annotation, index) => {
           return {
-            external_id: `${reportId}-annotation-${randomUUID()}`,
+            external_id: `${reportId}-annotation-${index + 1}`,
             annotation_type: "VULNERABILITY", // Requerido: VULNERABILITY, CODE_SMELL, BUG
             summary: annotation.summary, // Requerido
             details: annotation.description,

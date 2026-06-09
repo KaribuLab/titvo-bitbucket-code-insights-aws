@@ -21,6 +21,7 @@ export class CodeInsightsInputDto {
   repoSlug: string
   status: ReportStatus
   annotations: Annotation[]
+  scanMode?: string
 }
 
 export class CodeInsightsOutputDto {
