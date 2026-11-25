@@ -48,6 +48,10 @@ export class CodeInsightsService {
             type: "NUMBER",
             value: input.annotations.length,
           },
+          ...(input.annotations.some(annotation => !!annotation.acceptance) ? [
+            { title: "Active findings", type: "NUMBER", value: input.annotations.filter(annotation => !annotation.acceptance).length },
+            { title: "Accepted risks", type: "NUMBER", value: input.annotations.filter(annotation => !!annotation.acceptance).length },
+          ] : []),
           {
             title: "Report",
             type: "LINK",
@@ -82,7 +86,9 @@ export class CodeInsightsService {
             external_id: `${reportId}-annotation-${index + 1}`,
             annotation_type: "VULNERABILITY", // Requerido: VULNERABILITY, CODE_SMELL, BUG
             summary: annotation.summary, // Requerido
-            details: annotation.description,
+            details: annotation.acceptance
+              ? `${annotation.description}\n\nAccepted risk\nReason: ${annotation.acceptance.reason}\nDeclared responsible party (not authenticated): ${annotation.acceptance.accepted_by}\nExpires on: ${annotation.acceptance.expires_on}`
+              : annotation.description,
             severity: annotation.severity, // HIGH, MEDIUM, LOW, CRITICAL
             path: annotation.path,
             line: annotation.line,
